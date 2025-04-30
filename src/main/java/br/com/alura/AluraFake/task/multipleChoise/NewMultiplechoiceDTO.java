@@ -1,7 +1,6 @@
 package br.com.alura.AluraFake.task.multipleChoise;
 
 import br.com.alura.AluraFake.task.TaskType;
-import br.com.alura.AluraFake.task.singleChoice.SingleChoice;
 import br.com.alura.AluraFake.taskOption.TaskOption;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

@@ -1,12 +1,8 @@
 package br.com.alura.AluraFake.task.openText;
 
 import br.com.alura.AluraFake.task.TaskType;
-import br.com.alura.AluraFake.task.singleChoice.SingleChoice;
-import br.com.alura.AluraFake.taskOption.TaskOption;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
-import java.util.List;
 
 public class NewOpenTextDTO {
 

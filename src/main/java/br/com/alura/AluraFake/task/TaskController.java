@@ -4,12 +4,14 @@ import br.com.alura.AluraFake.task.multipleChoise.Multiplechoice;
 import br.com.alura.AluraFake.task.multipleChoise.NewMultiplechoiceDTO;
 import br.com.alura.AluraFake.task.openText.NewOpenTextDTO;
 import br.com.alura.AluraFake.task.openText.OpenText;
-import br.com.alura.AluraFake.task.singleChoice.SingleChoice;
 import br.com.alura.AluraFake.task.singleChoice.NewSingleChoiceDTO;
+import br.com.alura.AluraFake.task.singleChoice.SingleChoice;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class TaskController {
