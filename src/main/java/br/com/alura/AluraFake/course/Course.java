@@ -24,12 +24,12 @@ public class Course {
     @Deprecated
     public Course() {}
 
-    public Course(String title, String description, User instructor) {
+    public Course(String title, String description, User instructor, Status status) {
         Assert.isTrue(instructor.isInstructor(), "Usuario deve ser um instrutor");
         this.title = title;
         this.instructor = instructor;
         this.description = description;
-        this.status = Status.BUILDING;
+        this.status = status;
     }
 
     public Long getId() {

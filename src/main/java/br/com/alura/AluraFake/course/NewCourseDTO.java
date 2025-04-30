@@ -18,6 +18,8 @@ public class NewCourseDTO {
     @NotBlank
     @Email
     private String emailInstructor;
+    
+    private Status status;
 
     public NewCourseDTO() {}
 
@@ -43,5 +45,13 @@ public class NewCourseDTO {
 
     public void setEmailInstructor(String emailInstructor) {
         this.emailInstructor = emailInstructor;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 }

@@ -36,7 +36,7 @@ public class CourseController {
                     .body(new ErrorItemDTO("emailInstructor", "Usuário não é um instrutor"));
         }
 
-        Course course = new Course(newCourse.getTitle(), newCourse.getDescription(), possibleAuthor.get());
+        Course course = new Course(newCourse.getTitle(), newCourse.getDescription(), possibleAuthor.get(), newCourse.getStatus());
 
         courseRepository.save(course);
         return ResponseEntity.status(HttpStatus.CREATED).build();
