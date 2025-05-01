@@ -10,7 +10,9 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class TaskService {
@@ -25,17 +27,18 @@ public class TaskService {
     }
 
     public Task save(Task task) {
-
         int order = findNextAvailableOrder(task.getCourseId());
         task.setOrder(order);
-        validateCourseStatus(task.getCourseId());
-        validateStatementDuplicate(task);
         validateTask(task);
         return taskRepository.save(task);
     }
 
     public int findNextAvailableOrder(Long courseId) {
-        List<Integer> order = taskRepository.findTaskOrdersByCourse(courseId);
+        List<Integer> order = taskRepository.findByCourseId(courseId)
+                .stream()
+                .map(Task::getOrder)
+                .toList();
+
         for (int i = 1; i <= 5; i++) {
             if (!order.contains(i)) {
                 return i;
@@ -51,8 +54,36 @@ public class TaskService {
     }
 
     public boolean isTaskStatementDuplicate(Task task) {
-        return taskRepository.findAll().stream()
-                .anyMatch(t -> t.getStatement().equalsIgnoreCase(task.getStatement()));
+        return taskRepository.existsByStatementIgnoreCaseAndCourseId(
+                task.getStatement(),
+                task.getCourseId()
+        );
+    }
+
+    private void validateTask(Task task) {
+        validateCourseStatus(task.getCourseId());
+        validateStatementDuplicate(task);
+
+        if (task instanceof OpenText text) {
+            validateOpenText(text);
+            return;
+        }
+
+        if (task instanceof SingleChoice single) {
+            validateSingleChoice(single);
+            validateChoiceOptions(single.getOptions(), task);
+            return;
+        }
+
+        if (task instanceof Multiplechoice multiple) {
+            validateMultiChoice(multiple);
+            validateChoiceOptions(multiple.getOptions(), task);
+        }
+    }
+
+    private void validateChoiceOptions(List<TaskOption> options, Task task) {
+        validateDuplicateOption(options);
+        validateOptionEqualsStatement(options, task);
     }
 
     private void validateCourseStatus(Long courseId) {
@@ -63,12 +94,6 @@ public class TaskService {
     private void validateStatementDuplicate(Task task) {
         if (isTaskStatementDuplicate(task))
             throw new IllegalStateException("Duplicate task statement: a task with this statement already exists.");
-    }
-
-    private void validateTask(Task task) {
-        if (task instanceof OpenText text) validateOpenText(text);
-        else if (task instanceof SingleChoice single) validateSingleChoice(single);
-        else if (task instanceof Multiplechoice multiple) validateMultiChoice(multiple);
     }
 
     private void validateOpenText(OpenText task) {
@@ -88,19 +113,42 @@ public class TaskService {
         int taskOptionSize = task.getOptions().size();
         if (taskOptionSize < 2 || taskOptionSize > 5)
             throw new IllegalArgumentException("A task must have between 2 and 5 answer options, and exactly one of them must be marked as correct.");
-
     }
 
     private void validateMultiChoice(Multiplechoice task) {
+        int optionCount = task.getOptions().size();
+
         long correctCount = task.getOptions().stream()
                 .filter(TaskOption::isCorrect)
                 .count();
-        if (correctCount < 1) {
-            throw new IllegalArgumentException("Task must have at least one correct option.");
-        }
+        if (correctCount < 2)
+            throw new IllegalArgumentException("Task must have at least two correct option.");
 
-        int alternative = task.getOptions().size();
-        if (alternative < 3 || alternative > 5)
+        if (correctCount == optionCount)
+            throw new IllegalArgumentException("Task must have at least one incorrect option.");
+
+        if (optionCount < 3 || optionCount > 5)
             throw new IllegalArgumentException("A task must have between 3 and 5 answer options, and exactly one of them must be marked as correct.");
+    }
+
+    private void validateDuplicateOption(List<TaskOption> options) {
+        Set<String> seen = new HashSet<>();
+        for(TaskOption option : options) {
+            String normalized = option.getOption()
+                    .trim()
+                    .toUpperCase();
+            if(!seen.add(normalized))
+                throw new IllegalArgumentException("Duplicate option found: " + option.getOption());
+        }
+    }
+
+    private void validateOptionEqualsStatement(List<TaskOption> options, Task task) {
+        List<String> optionName = options
+                .stream()
+                .map(TaskOption::getOption )
+                .toList();
+
+        if(optionName.contains(task.getStatement()))
+            throw new IllegalArgumentException("An option cannot have the same text as the task statement.");
     }
 }
