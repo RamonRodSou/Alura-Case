@@ -1,6 +1,6 @@
 CREATE TABLE TaskOption(
     id bigint(20) NOT NULL AUTO_INCREMENT,
-    option_name varchar(50) NOT NULL,
+    option_name varchar(80) NOT NULL,
     isCorrect BOOLEAN,
     task_id BIGINT NOT NULL,
     PRIMARY KEY (id),
