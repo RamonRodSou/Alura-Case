@@ -27,42 +27,47 @@ public class TaskService {
     }
 
     public Task save(Task task) {
-        int order = findNextAvailableOrder(task.getCourseId());
-        task.setOrder(order);
         validateTask(task);
         return taskRepository.save(task);
     }
 
-    public int findNextAvailableOrder(Long courseId) {
-        List<Integer> order = taskRepository.findByCourseId(courseId)
-                .stream()
-                .map(Task::getOrder)
-                .toList();
+    public void reorganizeOrder(Task task) {
+        List<Task> tasks = taskRepository.findByCourseIdOrderByOrderAsc(task.getCourseId());
 
-        for (int i = 1; i <= 5; i++) {
-            if (!order.contains(i)) {
-                return i;
+        boolean isTaskOrder = tasks
+                .stream()
+                .anyMatch(t -> t.getOrder() >= task.getOrder());
+
+        if (tasks.size() >= 5 && isTaskOrder) {
+            throw new IllegalStateException("The course already has 5 tasks. It's not possible to add a new one with this order.");
+        }
+
+        for (int i = 1; i < task.getOrder(); i++) {
+            final int current = i;
+            boolean exists = tasks.stream().anyMatch(t -> t.getOrder() == current);
+            if (!exists) {
+                throw new IllegalArgumentException(
+                        String.format("Invalid task order. You must add order %d before adding order %d.", current, task.getOrder()));
             }
         }
-        throw new IllegalStateException("The course already has 5 tasks assigned.");
-    }
 
-    public boolean isCourseBuilding(Long courseId) {
-        return courseRepository.findById(courseId)
-                .map(course -> course.getStatus().equals(Status.BUILDING))
-                .orElseThrow(() -> new EntityNotFoundException("Course not found with id " + courseId));
-    }
+        for (int i = tasks.size() - 1; i >= 0; i--) {
+            Task existing = tasks.get(i);
+            if (existing.getOrder() >= task.getOrder()) {
+                if (existing.getOrder() == 5) {
+                    throw new IllegalStateException("Cannot shift tasks. Maximum task order (5) would be exceeded.");
+                }
+                existing.setOrder(existing.getOrder() + 1);
+            }
+        }
 
-    public boolean isTaskStatementDuplicate(Task task) {
-        return taskRepository.existsByStatementIgnoreCaseAndCourseId(
-                task.getStatement(),
-                task.getCourseId()
-        );
+        taskRepository.saveAll(tasks);
     }
 
     private void validateTask(Task task) {
         validateCourseStatus(task.getCourseId());
         validateStatementDuplicate(task);
+        reorganizeOrder(task);
 
         if (task instanceof OpenText text) {
             validateOpenText(text);
@@ -133,11 +138,11 @@ public class TaskService {
 
     private void validateDuplicateOption(List<TaskOption> options) {
         Set<String> seen = new HashSet<>();
-        for(TaskOption option : options) {
+        for (TaskOption option : options) {
             String normalized = option.getOption()
                     .trim()
                     .toUpperCase();
-            if(!seen.add(normalized))
+            if (!seen.add(normalized))
                 throw new IllegalArgumentException("Duplicate option found: " + option.getOption());
         }
     }
@@ -148,7 +153,20 @@ public class TaskService {
                 .map(TaskOption::getOption )
                 .toList();
 
-        if(optionName.contains(task.getStatement()))
+        if (optionName.contains(task.getStatement()))
             throw new IllegalArgumentException("An option cannot have the same text as the task statement.");
+    }
+
+    public boolean isCourseBuilding(Long courseId) {
+        return courseRepository.findById(courseId)
+                .map(course -> course.getStatus().equals(Status.BUILDING))
+                .orElseThrow(() -> new EntityNotFoundException("Course not found with id " + courseId));
+    }
+
+    public boolean isTaskStatementDuplicate(Task task) {
+        return taskRepository.existsByStatementIgnoreCaseAndCourseId(
+                task.getStatement(),
+                task.getCourseId()
+        );
     }
 }
