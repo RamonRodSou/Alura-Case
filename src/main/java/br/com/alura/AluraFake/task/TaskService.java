@@ -2,11 +2,12 @@ package br.com.alura.AluraFake.task;
 
 import br.com.alura.AluraFake.course.CourseRepository;
 import br.com.alura.AluraFake.course.Status;
+import br.com.alura.AluraFake.exepctions.CourseFullException;
+import br.com.alura.AluraFake.exepctions.TaskFullException;
 import br.com.alura.AluraFake.task.multipleChoise.Multiplechoice;
 import br.com.alura.AluraFake.task.openText.OpenText;
 import br.com.alura.AluraFake.task.singleChoice.SingleChoice;
 import br.com.alura.AluraFake.taskOption.TaskOption;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,14 +40,14 @@ public class TaskService {
                 .anyMatch(t -> t.getOrder() >= task.getOrder());
 
         if (tasks.size() >= 5 && isTaskOrder) {
-            throw new IllegalStateException("The course already has 5 tasks. It's not possible to add a new one with this order.");
+            throw TaskFullException.badRequest("The course already has 5 tasks. It's not possible to add a new one with this order.");
         }
 
         for (int i = 1; i < task.getOrder(); i++) {
             final int current = i;
             boolean exists = tasks.stream().anyMatch(t -> t.getOrder() == current);
             if (!exists) {
-                throw new IllegalArgumentException(
+                throw TaskFullException.badRequest(
                         String.format("Invalid task order. You must add order %d before adding order %d.", current, task.getOrder()));
             }
         }
@@ -55,7 +56,7 @@ public class TaskService {
             Task existing = tasks.get(i);
             if (existing.getOrder() >= task.getOrder()) {
                 if (existing.getOrder() == 5) {
-                    throw new IllegalStateException("Cannot shift tasks. Maximum task order (5) would be exceeded.");
+                    throw TaskFullException.badRequest("Cannot shift tasks. Maximum task order (5) would be exceeded.");
                 }
                 existing.setOrder(existing.getOrder() + 1);
             }
@@ -93,19 +94,19 @@ public class TaskService {
 
     private void validateCourseStatus(Long courseId) {
         if (!isCourseBuilding(courseId))
-            throw new IllegalStateException("The course must have status BUILDING to add a task.");
+            throw TaskFullException.badRequest("The course must have status BUILDING to add a task.");
     }
 
     private void validateStatementDuplicate(Task task) {
         if (isTaskStatementDuplicate(task))
-            throw new IllegalStateException("Duplicate task statement: a task with this statement already exists.");
+            throw TaskFullException.badRequest("Duplicate task statement: a task with this statement already exists.");
     }
 
     private void validateOpenText(OpenText task) {
         String statement = task.getStatement();
 
         if (statement.length() < 4 | statement.length() > 255)
-            throw new IllegalArgumentException("The statement must be between 4 and 255 characters.");
+            throw TaskFullException.badRequest("The statement must be between 4 and 255 characters.");
     }
 
     private void validateSingleChoice(SingleChoice task) {
@@ -113,11 +114,11 @@ public class TaskService {
                 .filter(TaskOption::isCorrect)
                 .count();
         if (correctCount != 1)
-            throw new IllegalArgumentException("Task must have exactly one correct option.");
+            throw TaskFullException.badRequest("Task must have exactly one correct option.");
 
         int taskOptionSize = task.getOptions().size();
         if (taskOptionSize < 2 || taskOptionSize > 5)
-            throw new IllegalArgumentException("A task must have between 2 and 5 answer options, and exactly one of them must be marked as correct.");
+            throw TaskFullException.badRequest("A task must have between 2 and 5 answer options, and exactly one of them must be marked as correct.");
     }
 
     private void validateMultiChoice(Multiplechoice task) {
@@ -127,13 +128,13 @@ public class TaskService {
                 .filter(TaskOption::isCorrect)
                 .count();
         if (correctCount < 2)
-            throw new IllegalArgumentException("Task must have at least two correct option.");
+            throw TaskFullException.badRequest("Task must have at least two correct option.");
 
         if (correctCount == optionCount)
-            throw new IllegalArgumentException("Task must have at least one incorrect option.");
+            throw TaskFullException.badRequest("Task must have at least one incorrect option.");
 
         if (optionCount < 3 || optionCount > 5)
-            throw new IllegalArgumentException("A task must have between 3 and 5 answer options, and exactly one of them must be marked as correct.");
+            throw TaskFullException.badRequest("A task must have between 3 and 5 answer options, and exactly one of them must be marked as correct.");
     }
 
     private void validateDuplicateOption(List<TaskOption> options) {
@@ -143,7 +144,7 @@ public class TaskService {
                     .trim()
                     .toUpperCase();
             if (!seen.add(normalized))
-                throw new IllegalArgumentException("Duplicate option found: " + option.getOption());
+                throw TaskFullException.badRequest("Duplicate option found: " + option.getOption());
         }
     }
 
@@ -154,13 +155,13 @@ public class TaskService {
                 .toList();
 
         if (optionName.contains(task.getStatement()))
-            throw new IllegalArgumentException("An option cannot have the same text as the task statement.");
+            throw TaskFullException.badRequest("An option cannot have the same text as the task statement.");
     }
 
     public boolean isCourseBuilding(Long courseId) {
         return courseRepository.findById(courseId)
                 .map(course -> course.getStatus().equals(Status.BUILDING))
-                .orElseThrow(() -> new EntityNotFoundException("Course not found with id " + courseId));
+                .orElseThrow(() -> CourseFullException.notFound("Course not found with id " + courseId));
     }
 
     public boolean isTaskStatementDuplicate(Task task) {
