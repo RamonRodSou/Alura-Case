@@ -11,6 +11,10 @@ public class CourseFullException extends RuntimeException {
         this.status = status;
     }
 
+    public static CourseFullException bedRequest(String message) {
+        return new CourseFullException(message, HttpStatus.BAD_REQUEST);
+    }
+
     public static CourseFullException notFound(String message) {
         return new CourseFullException(message, HttpStatus.NOT_FOUND);
     }
