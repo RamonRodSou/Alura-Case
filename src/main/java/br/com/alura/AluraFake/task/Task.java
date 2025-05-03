@@ -51,8 +51,8 @@ public abstract class Task {
         return order;
     }
 
-    public void setOrder(int taskOrder) {
-        this.order = taskOrder;
+    public void setOrder(int order) {
+        this.order = order;
     }
 
     public String getStatement() {
