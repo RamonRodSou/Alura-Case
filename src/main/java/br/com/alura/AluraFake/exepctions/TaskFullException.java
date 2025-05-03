@@ -15,6 +15,9 @@ public class TaskFullException extends RuntimeException {
         return new TaskFullException(message, HttpStatus.BAD_REQUEST);
     }
 
+    public static TaskFullException notFound(String message) {
+        return new TaskFullException(message, HttpStatus.NOT_FOUND);
+    }
     public HttpStatus getStatus() {
         return status;
     }
