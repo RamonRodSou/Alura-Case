@@ -39,29 +39,29 @@ public class TaskService {
                 .stream()
                 .anyMatch(t -> t.getOrder() >= task.getOrder());
 
-        if (tasks.size() >= 5 && isTaskOrder) {
+        if (tasks.size() >= 5 && isTaskOrder)
             throw TaskFullException.badRequest("The course already has 5 tasks. It's not possible to add a new one with this order.");
-        }
 
         for (int i = 1; i < task.getOrder(); i++) {
             final int current = i;
-            boolean exists = tasks.stream().anyMatch(t -> t.getOrder() == current);
-            if (!exists) {
+            boolean exists = tasks
+                    .stream()
+                    .anyMatch(t -> t.getOrder() == current);
+
+            if (!exists)
                 throw TaskFullException.badRequest(
                         String.format("Invalid task order. You must add order %d before adding order %d.", current, task.getOrder()));
-            }
         }
 
         for (int i = tasks.size() - 1; i >= 0; i--) {
-            Task existing = tasks.get(i);
-            if (existing.getOrder() >= task.getOrder()) {
-                if (existing.getOrder() == 5) {
+            Task previousTask = tasks.get(i);
+            if (previousTask.getOrder() >= task.getOrder()) {
+                if (previousTask.getOrder() == 5) {
                     throw TaskFullException.badRequest("Cannot shift tasks. Maximum task order (5) would be exceeded.");
                 }
-                existing.setOrder(existing.getOrder() + 1);
+                previousTask.setOrder(previousTask.getOrder() + 1);
             }
         }
-
         taskRepository.saveAll(tasks);
     }
 
@@ -94,7 +94,7 @@ public class TaskService {
 
     private void validateCourseStatus(Long courseId) {
         if (!isCourseBuilding(courseId))
-            throw TaskFullException.badRequest("The course must have status BUILDING to add a task.");
+            throw TaskFullException.badRequest("The course must have status " + Status.BUILDING + " to add a task.");
     }
 
     private void validateStatementDuplicate(Task task) {
