@@ -1,25 +1,36 @@
 package br.com.alura.AluraFake.course;
 
-import br.com.alura.AluraFake.user.*;
+import br.com.alura.AluraFake.exepctions.CourseFullException;
+import br.com.alura.AluraFake.exepctions.TaskFullException;
+import br.com.alura.AluraFake.task.Task;
+import br.com.alura.AluraFake.task.TaskRepository;
+import br.com.alura.AluraFake.task.TaskType;
+import br.com.alura.AluraFake.user.User;
+import br.com.alura.AluraFake.user.UserRepository;
 import br.com.alura.AluraFake.util.ErrorItemDTO;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class CourseController {
 
     private final CourseRepository courseRepository;
     private final UserRepository userRepository;
+    private final TaskRepository taskRepository;
 
     @Autowired
-    public CourseController(CourseRepository courseRepository, UserRepository userRepository){
+    public CourseController(CourseRepository courseRepository, UserRepository userRepository, TaskRepository taskRepository){
         this.courseRepository = courseRepository;
         this.userRepository = userRepository;
+        this.taskRepository = taskRepository;
     }
 
     @Transactional
@@ -36,7 +47,7 @@ public class CourseController {
                     .body(new ErrorItemDTO("emailInstructor", "Usuário não é um instrutor"));
         }
 
-        Course course = new Course(newCourse.getTitle(), newCourse.getDescription(), possibleAuthor.get(), newCourse.getStatus());
+        Course course = new Course(newCourse.getTitle(), newCourse.getDescription(), possibleAuthor.get());
 
         courseRepository.save(course);
         return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -50,9 +61,51 @@ public class CourseController {
         return ResponseEntity.ok(courses);
     }
 
+    @Transactional
     @PostMapping("/course/{id}/publish")
-    public ResponseEntity createCourse(@PathVariable("id") Long id) {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<CourseListItemDTO> createCourse(@PathVariable("id") Long id) {
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> CourseFullException.notFound("Course not found with id " + id));
+
+        validateCourse(course);
+
+        course.publish();
+        courseRepository.save(course);
+
+        System.out.println(course.getPublishedAt());
+        return ResponseEntity.ok(new CourseListItemDTO(course));
     }
 
+    private void validateCourse(Course course) {
+        validateTask(course);
+        validateCourseStatus(course);
+    }
+
+    private void validateTask(Course course) {
+        List<Task> task = taskRepository.findByCourseIdOrderByOrderAsc(course.getId());
+        if (task.isEmpty())
+            throw TaskFullException.notFound("No tasks found for course with id  " + course.getId());
+
+        validateTaskTypes(task);
+    }
+
+    private void validateTaskTypes(List<Task> task) {
+        List<TaskType> taskType = task
+                .stream()
+                .map(Task::getTaskType)
+                .toList();
+
+        if (!hasAllRequiredTaskTypes(task))
+            throw CourseFullException.notFound("The course must have at least one of each type of statement");
+    }
+
+    private void validateCourseStatus(Course course) {
+        if (course.getStatus().equals(Status.PUBLISHED))
+             throw CourseFullException.bedRequest("The course must have status: " + Status.BUILDING);
+    }
+
+    private boolean hasAllRequiredTaskTypes(List<Task> task) {
+        List<TaskType> types = task.stream().map(Task::getTaskType).toList();
+        return new HashSet<>(types).containsAll(List.of(TaskType.OPEN_TEXT, TaskType.SINGLE_CHOICE, TaskType.MULTIPLE_CHOICE));
+    }
 }
