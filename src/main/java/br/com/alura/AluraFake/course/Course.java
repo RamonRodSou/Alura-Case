@@ -24,12 +24,12 @@ public class Course {
     @Deprecated
     public Course() {}
 
-    public Course(String title, String description, User instructor, Status status) {
+    public Course(String title, String description, User instructor) {
         Assert.isTrue(instructor.isInstructor(), "Usuario deve ser um instrutor");
         this.title = title;
         this.instructor = instructor;
         this.description = description;
-        this.status = status;
+        this.status = Status.BUILDING;
     }
 
     public Long getId() {
@@ -42,10 +42,6 @@ public class Course {
 
     public String getTitle() {
         return title;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
     }
 
     public User getInstructor() {
@@ -62,5 +58,10 @@ public class Course {
 
     public LocalDateTime getPublishedAt() {
         return publishedAt;
+    }
+
+    public void publish() {
+        this.status = Status.PUBLISHED;
+        this.publishedAt = LocalDateTime.now();
     }
 }
