@@ -4,5 +4,5 @@ CREATE TABLE TaskOption(
     isCorrect BOOLEAN,
     task_id BIGINT NOT NULL,
     PRIMARY KEY (id),
-    CONSTRAINT fk_task FOREIGN KEY (task_id) REFERENCES task(id)
+    CONSTRAINT fk_task FOREIGN KEY (task_id) REFERENCES Task(id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
