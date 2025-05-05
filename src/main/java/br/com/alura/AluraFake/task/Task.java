@@ -1,6 +1,6 @@
 package br.com.alura.AluraFake.task;
 
-import br.com.alura.AluraFake.task.multipleChoise.Multiplechoice;
+import br.com.alura.AluraFake.task.multipleChoise.MultipleChoice;
 import br.com.alura.AluraFake.task.openText.OpenText;
 import br.com.alura.AluraFake.task.singleChoice.SingleChoice;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -9,7 +9,7 @@ import jakarta.persistence.*;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = OpenText.class, name = "OPEN_TEXT"),
         @JsonSubTypes.Type(value = SingleChoice.class, name = "SINGLE_CHOICE"),
-        @JsonSubTypes.Type(value = Multiplechoice.class, name = "MULTIPLE_CHOICE")
+        @JsonSubTypes.Type(value = MultipleChoice.class, name = "MULTIPLE_CHOICE")
 })
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
