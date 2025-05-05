@@ -1,10 +1,12 @@
 package br.com.alura.AluraFake.task.openText;
 
+import br.com.alura.AluraFake.exepctions.TaskException;
+import br.com.alura.AluraFake.task.TaskDTO;
 import br.com.alura.AluraFake.task.TaskType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public class NewOpenTextDTO {
+public class NewOpenTextDTO extends TaskDTO {
 
     @NotBlank
     private String statement;
@@ -13,15 +15,6 @@ public class NewOpenTextDTO {
     @NotNull
     private Long courseId;
     private TaskType taskType;
-
-    public OpenText toEntity() {
-        OpenText openText = new OpenText();
-        openText.setStatement(statement);
-        openText.setOrder(order);
-        openText.setCourseId(courseId);
-        openText.setTaskType(TaskType.OPEN_TEXT);
-        return openText;
-    }
 
     public String getStatement() {
         return statement;
@@ -54,4 +47,21 @@ public class NewOpenTextDTO {
     public void setTaskType(TaskType taskType) {
         this.taskType = taskType;
     }
+
+    @Override
+    public OpenText toEntity() {
+        OpenText openText = new OpenText();
+        openText.setStatement(statement);
+        openText.setOrder(order);
+        openText.setCourseId(courseId);
+        openText.setTaskType(TaskType.OPEN_TEXT);
+        return openText;
+    }
+
+    @Override
+    public void validate() {
+        if (this.getStatement().length() < 4 | this.getStatement().length() > 255)
+            throw TaskException.badRequest("The statement must be between 4 and 255 characters.");
+    }
+
 }

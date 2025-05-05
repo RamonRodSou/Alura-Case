@@ -1,4 +1,4 @@
-package br.com.alura.AluraFake.task.singleChoice;
+package br.com.alura.AluraFake.task.multipleChoise;
 
 import br.com.alura.AluraFake.exepctions.TaskException;
 import br.com.alura.AluraFake.task.TaskDTO;
@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
-public class NewSingleChoiceDTO extends TaskDTO {
+public class NewMultipleChoiceDTO extends TaskDTO {
 
     @NotBlank
     private String statement;
@@ -62,32 +62,38 @@ public class NewSingleChoiceDTO extends TaskDTO {
             option.setTask(this.toEntity());
         }
     }
+
     @Override
-    public SingleChoice toEntity() {
-        SingleChoice singleChoice = new SingleChoice();
-        singleChoice.setStatement(statement);
-        singleChoice.setOrder(order);
-        singleChoice.setCourseId(courseId);
-        singleChoice.setTaskType(TaskType.SINGLE_CHOICE);
-        singleChoice.setOptions(options);
-        return singleChoice;
+    public MultipleChoice toEntity() {
+        MultipleChoice multiplechoice = new MultipleChoice();
+        multiplechoice.setStatement(statement);
+        multiplechoice.setOrder(order);
+        multiplechoice.setCourseId(courseId);
+        multiplechoice.setTaskType(TaskType.MULTIPLE_CHOICE);
+        multiplechoice.setOptions(options);
+        return multiplechoice;
     }
 
     @Override
     public void validate() {
-        this.validateSingleChoice();
+        validateMultiChoice();
         TaskDTO.validateChoiceOptions(this.getStatement(), this.getOptions());
     }
 
-    private void validateSingleChoice() {
+    private void validateMultiChoice() {
+        int optionCount = this.getOptions().size();
+
         long correctCount = this.getOptions().stream()
                 .filter(TaskOption::isCorrect)
                 .count();
-        if (correctCount != 1)
-            throw TaskException.badRequest("Task must have exactly one correct option.");
+        if (correctCount < 2)
+            throw TaskException.badRequest("Task must have at least two correct option.");
 
-        int taskOptionSize = this.getOptions().size();
-        if (taskOptionSize < 2 || taskOptionSize > 5)
-            throw TaskException.badRequest("A task must have between 2 and 5 answer options, and exactly one of them must be marked as correct.");
+        if (correctCount == optionCount)
+            throw TaskException.badRequest("Task must have at least one incorrect option.");
+
+        if (optionCount < 3 || optionCount > 5)
+            throw TaskException.badRequest("A task must have between 3 and 5 answer options, and exactly one of them must be marked as correct.");
     }
+
 }
