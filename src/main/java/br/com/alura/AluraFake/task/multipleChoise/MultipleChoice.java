@@ -12,16 +12,16 @@ import java.util.List;
 
 @Entity
 @DiscriminatorValue("MULTIPLE_CHOICE")
-public class Multiplechoice extends Task {
+public class MultipleChoice extends Task {
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     List<TaskOption> options;
 
-    public Multiplechoice() {
+    public MultipleChoice() {
         super();
     }
 
-    public Multiplechoice(Long id, String statement, int order, Long courseId, List<TaskOption> option, TaskType taskType) {
+    public MultipleChoice(Long id, String statement, int order, Long courseId, List<TaskOption> option, TaskType taskType) {
         super(id, statement, order, courseId, taskType);
         this.options = option;
     }
