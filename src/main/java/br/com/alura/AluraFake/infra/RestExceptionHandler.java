@@ -1,7 +1,7 @@
 package br.com.alura.AluraFake.infra;
 
-import br.com.alura.AluraFake.exepctions.CourseFullException;
-import br.com.alura.AluraFake.exepctions.TaskFullException;
+import br.com.alura.AluraFake.exepctions.CourseException;
+import br.com.alura.AluraFake.exepctions.TaskException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -16,8 +16,8 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     private static final String ANSI_RED = "\u001B[31m";
     private static final String ANSI_YELLOW = "\u001B[33m";
 
-    @ExceptionHandler(TaskFullException.class)
-    private ResponseEntity<RestErrorMessage> taskHandlerException(TaskFullException exception) {
+    @ExceptionHandler(TaskException.class)
+    private ResponseEntity<RestErrorMessage> taskHandlerException(TaskException exception) {
         log.warning(
                 ANSI_RED
                     + "A possible error might be occurring inside the TaskService: "
@@ -33,8 +33,8 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
                 .body(errorMessage);
     }
 
-    @ExceptionHandler(CourseFullException.class)
-    public ResponseEntity<RestErrorMessage> courseHandleException(CourseFullException exception) {
+    @ExceptionHandler(CourseException.class)
+    public ResponseEntity<RestErrorMessage> courseHandleException(CourseException exception) {
         log.warning(
                 ANSI_RED
                     + "A possible error might be occurring inside the CourseService or in areas where the course data is required:  "

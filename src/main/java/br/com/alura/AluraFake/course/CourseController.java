@@ -1,7 +1,7 @@
 package br.com.alura.AluraFake.course;
 
-import br.com.alura.AluraFake.exepctions.CourseFullException;
-import br.com.alura.AluraFake.exepctions.TaskFullException;
+import br.com.alura.AluraFake.exepctions.CourseException;
+import br.com.alura.AluraFake.exepctions.TaskException;
 import br.com.alura.AluraFake.task.Task;
 import br.com.alura.AluraFake.task.TaskRepository;
 import br.com.alura.AluraFake.task.TaskType;
@@ -65,7 +65,7 @@ public class CourseController {
     @PostMapping("/course/{id}/publish")
     public ResponseEntity<CourseListItemDTO> createCourse(@PathVariable("id") Long id) {
         Course course = courseRepository.findById(id)
-                .orElseThrow(() -> CourseFullException.notFound("Course not found with id " + id));
+                .orElseThrow(() -> CourseException.notFound("Course not found with id " + id));
 
         validateCourse(course);
 
@@ -84,7 +84,7 @@ public class CourseController {
     private void validateTask(Course course) {
         List<Task> task = taskRepository.findByCourseIdOrderByOrderAsc(course.getId());
         if (task.isEmpty())
-            throw TaskFullException.notFound("No tasks found for course with id  " + course.getId());
+            throw TaskException.notFound("No tasks found for course with id  " + course.getId());
 
         validateTaskTypes(task);
     }
@@ -96,12 +96,12 @@ public class CourseController {
                 .toList();
 
         if (!hasAllRequiredTaskTypes(task))
-            throw CourseFullException.notFound("The course must have at least one of each type of statement");
+            throw CourseException.notFound("The course must have at least one of each type of statement");
     }
 
     private void validateCourseStatus(Course course) {
         if (course.getStatus().equals(Status.PUBLISHED))
-             throw CourseFullException.bedRequest("The course must have status: " + Status.BUILDING);
+             throw CourseException.bedRequest("The course must have status: " + Status.BUILDING);
     }
 
     private boolean hasAllRequiredTaskTypes(List<Task> task) {
