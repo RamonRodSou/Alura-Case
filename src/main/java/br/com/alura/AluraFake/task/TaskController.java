@@ -1,11 +1,11 @@
 package br.com.alura.AluraFake.task;
 
-import br.com.alura.AluraFake.task.multipleChoise.Multiplechoice;
-import br.com.alura.AluraFake.task.multipleChoise.NewMultiplechoiceDTO;
+import br.com.alura.AluraFake.task.multipleChoise.MultipleChoiceResponse;
+import br.com.alura.AluraFake.task.multipleChoise.NewMultipleChoiceDTO;
 import br.com.alura.AluraFake.task.openText.NewOpenTextDTO;
-import br.com.alura.AluraFake.task.openText.OpenText;
+import br.com.alura.AluraFake.task.openText.OpenTextResponse;
 import br.com.alura.AluraFake.task.singleChoice.NewSingleChoiceDTO;
-import br.com.alura.AluraFake.task.singleChoice.SingleChoice;
+import br.com.alura.AluraFake.task.singleChoice.SingleChoiceResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -26,22 +26,20 @@ public class TaskController {
 
     @Transactional
     @PostMapping("/task/new/opentext")
-    public ResponseEntity<OpenText> save(@RequestBody @Valid NewOpenTextDTO taskDTO) {
-        OpenText openText = taskDTO.toEntity();
-        return ResponseEntity.ok((OpenText) taskService.save(openText));
+    public ResponseEntity<OpenTextResponse> save(@RequestBody @Valid NewOpenTextDTO openTextDTO) {
+        return ResponseEntity.ok((OpenTextResponse) taskService.save(openTextDTO));
+
     }
 
     @Transactional
     @PostMapping("/task/new/singlechoice")
-    public ResponseEntity<SingleChoice> save(@RequestBody @Valid NewSingleChoiceDTO taskDTO) {
-        SingleChoice singleChoice = taskDTO.toEntity();
-        return ResponseEntity.ok((SingleChoice) taskService.save(singleChoice));
+    public ResponseEntity<SingleChoiceResponse> save(@RequestBody @Valid NewSingleChoiceDTO singleDTO) {
+        return ResponseEntity.ok((SingleChoiceResponse) taskService.save(singleDTO));
     }
 
     @Transactional
     @PostMapping("/task/new/multiplechoice")
-    public ResponseEntity<Multiplechoice> save(@RequestBody @Valid NewMultiplechoiceDTO taskDTO) {
-        Multiplechoice  multiplechoice = taskDTO.toEntity();
-        return ResponseEntity.ok((Multiplechoice) taskService.save(multiplechoice));
+    public ResponseEntity<MultipleChoiceResponse> save(@RequestBody @Valid NewMultipleChoiceDTO multipleDTO) {
+        return ResponseEntity.ok((MultipleChoiceResponse) taskService.save(multipleDTO));
     }
 }
