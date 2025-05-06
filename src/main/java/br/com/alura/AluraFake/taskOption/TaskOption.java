@@ -1,6 +1,7 @@
 package br.com.alura.AluraFake.taskOption;
 
 import br.com.alura.AluraFake.task.Task;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 
@@ -17,6 +18,7 @@ public class TaskOption {
     boolean isCorrect;
 
     @ManyToOne
+    @JsonBackReference
     private Task task;
 
     public TaskOption() { }

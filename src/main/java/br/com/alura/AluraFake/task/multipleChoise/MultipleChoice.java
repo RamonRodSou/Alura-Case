@@ -3,6 +3,7 @@ package br.com.alura.AluraFake.task.multipleChoise;
 import br.com.alura.AluraFake.task.Task;
 import br.com.alura.AluraFake.task.TaskType;
 import br.com.alura.AluraFake.taskOption.TaskOption;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -15,6 +16,7 @@ import java.util.List;
 public class MultipleChoice extends Task {
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     List<TaskOption> options;
 
     public MultipleChoice() {
