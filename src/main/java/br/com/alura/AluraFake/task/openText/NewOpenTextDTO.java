@@ -16,6 +16,8 @@ public class NewOpenTextDTO extends TaskDTO {
     private Long courseId;
     private TaskType taskType;
 
+    public NewOpenTextDTO() {}
+
     public String getStatement() {
         return statement;
     }
