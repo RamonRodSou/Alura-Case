@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TaskService {
@@ -32,6 +33,12 @@ public class TaskService {
         Task saved = taskRepository.save(task);
         return mapper.mapResponse(saved);
     }
+
+    public List<TaskResponse> findAll() {
+        List<Task> tasks = taskRepository.findAll();
+        return tasks.stream()
+                .map(mapper::mapResponse)
+                .collect(Collectors.toList());    }
 
     private void validateTask(TaskDTO dto) {
         validateCourseStatus(dto.getCourseId());
