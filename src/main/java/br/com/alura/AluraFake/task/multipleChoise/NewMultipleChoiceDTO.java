@@ -76,11 +76,11 @@ public class NewMultipleChoiceDTO extends TaskDTO {
 
     @Override
     public void validate() {
-        validateMultiChoice();
+        validateMultipleChoice();
         TaskDTO.validateChoiceOptions(this.getStatement(), this.getOptions());
     }
 
-    private void validateMultiChoice() {
+    private void validateMultipleChoice() {
         int optionCount = this.getOptions().size();
 
         long correctCount = this.getOptions().stream()
