@@ -6,7 +6,10 @@ import br.com.alura.AluraFake.task.openText.OpenText;
 import br.com.alura.AluraFake.task.openText.OpenTextResponse;
 import br.com.alura.AluraFake.task.singleChoice.SingleChoice;
 import br.com.alura.AluraFake.task.singleChoice.SingleChoiceResponse;
+import br.com.alura.AluraFake.taskOption.TaskOption;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class MapperTask {
@@ -48,11 +51,27 @@ public class MapperTask {
         return multipleChoice;
     }
 
-    private static void taskResponseField(TaskResponse dto, Task entity) {
+    private void taskResponseField(TaskResponse dto, Task entity) {
         dto.setId(entity.getId());
         dto.setStatement(entity.getStatement());
         dto.setOrder(entity.getOrder());
         dto.setCourseId(entity.getCourseId());
+
+        if (entity instanceof SingleChoice singleChoice && dto instanceof SingleChoiceResponse singleResp) {
+            if (singleChoice.getOptions() != null) {
+                List<TaskOption> options = singleChoice.getOptions().stream()
+                        .toList();
+                singleResp.setOptions(options);
+            }
+        }
+
+        if (entity instanceof MultipleChoice multipleChoice && dto instanceof MultipleChoiceResponse multiResp) {
+            if (multipleChoice.getOptions() != null) {
+                List<TaskOption> options = multipleChoice.getOptions().stream()
+                        .toList();
+                multiResp.setOptions(options);
+            }
+        }
     }
 
 }
