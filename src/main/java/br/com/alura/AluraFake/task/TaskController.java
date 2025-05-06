@@ -10,11 +10,12 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
+@RequestMapping("/task")
 public class TaskController {
 
     private final TaskService taskService;
@@ -25,21 +26,27 @@ public class TaskController {
     }
 
     @Transactional
-    @PostMapping("/task/new/opentext")
+    @PostMapping("/new/opentext")
     public ResponseEntity<OpenTextResponse> save(@RequestBody @Valid NewOpenTextDTO openTextDTO) {
         return ResponseEntity.ok((OpenTextResponse) taskService.save(openTextDTO));
 
     }
 
     @Transactional
-    @PostMapping("/task/new/singlechoice")
+    @PostMapping("/new/singlechoice")
     public ResponseEntity<SingleChoiceResponse> save(@RequestBody @Valid NewSingleChoiceDTO singleDTO) {
         return ResponseEntity.ok((SingleChoiceResponse) taskService.save(singleDTO));
     }
 
     @Transactional
-    @PostMapping("/task/new/multiplechoice")
+    @PostMapping("/new/multiplechoice")
     public ResponseEntity<MultipleChoiceResponse> save(@RequestBody @Valid NewMultipleChoiceDTO multipleDTO) {
         return ResponseEntity.ok((MultipleChoiceResponse) taskService.save(multipleDTO));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<TaskResponse>> listAllTasks() {
+        List<TaskResponse> tasks = taskService.findAll();
+        return ResponseEntity.ok(tasks);
     }
 }
