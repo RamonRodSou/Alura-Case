@@ -54,7 +54,7 @@ public class CourseController {
     }
 
     @GetMapping("/course/all")
-    public ResponseEntity<List<CourseListItemDTO>> createCourse() {
+    public ResponseEntity<List<CourseListItemDTO>> listAllCourses() {
         List<CourseListItemDTO> courses = courseRepository.findAll().stream()
                 .map(CourseListItemDTO::new)
                 .toList();
@@ -63,7 +63,7 @@ public class CourseController {
 
     @Transactional
     @PostMapping("/course/{id}/publish")
-    public ResponseEntity<CourseListItemDTO> createCourse(@PathVariable("id") Long id) {
+    public ResponseEntity<CourseListItemDTO> publishCourse(@PathVariable("id") Long id) {
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> CourseException.notFound("Course not found with id " + id));
 
@@ -71,8 +71,6 @@ public class CourseController {
 
         course.publish();
         courseRepository.save(course);
-
-        System.out.println(course.getPublishedAt());
         return ResponseEntity.ok(new CourseListItemDTO(course));
     }
 
@@ -84,7 +82,7 @@ public class CourseController {
     private void validateTask(Course course) {
         List<Task> task = taskRepository.findByCourseIdOrderByOrderAsc(course.getId());
         if (task.isEmpty())
-            throw TaskException.notFound("No tasks found for course with id  " + course.getId());
+            throw TaskException.notFound("No tasks found for course with id " + course.getId());
 
         validateTaskTypes(task);
     }
